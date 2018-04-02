@@ -15,7 +15,7 @@ const paymentApi = (app) => {
 
   app.post('/', (req, res) => {
     console.log(req.body);
-    const chargeObject = Object.assign({}, ...req.body, { source: req.body.token });
+    const chargeObject = Object.assign({}, { ...req.body }, { source: req.body.token });
     console.log(chargeObject);
     stripe.charges.create(chargeObject, postStripeCharge(res));
   });
