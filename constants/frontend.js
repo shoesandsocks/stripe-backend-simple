@@ -4,6 +4,10 @@ const FRONTEND_DEV_URLS = [
   'https://0f885ea0.ngrok.io',
 ]; // TODO: for blog
 
-const FRONTEND_PROD_URLS = ['https://www.pineandvine.com', 'https://pineandvine.com'];
+const FRONTEND_PROD_URLS = [
+  'https://www.pineandvine.com',
+  'https://pineandvine.com',
+  'https://0f885ea0.ngrok.io',
+];
 
 module.exports = process.env.NODE_ENV === 'production' ? FRONTEND_PROD_URLS : FRONTEND_DEV_URLS;
