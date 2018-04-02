@@ -14,6 +14,7 @@ const paymentApi = (app) => {
   });
 
   app.post('/', (req, res) => {
+    console.log(req.body); // TODO: THIS IS WHERE TESTING STOPPED - WHAT'S SERVER SEEING FROM paymentrequestform's POST?
     stripe.charges.create(req.body, postStripeCharge(res));
   });
 
