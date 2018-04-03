@@ -17,6 +17,11 @@ const paymentApi = (app) => {
     stripe.charges.create(req.body, postStripeCharge(res));
   });
 
+  app.post('/webhook', (req, res) => {
+    console.log(req.body);
+    res.status(200).send('okay!');
+  });
+
   return app;
 };
 
