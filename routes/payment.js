@@ -1,4 +1,7 @@
 const stripe = require('../constants/stripe');
+const fetch = require('node-fetch');
+
+require('dotenv').config();
 
 const postStripeCharge = res => (stripeErr, stripeRes) => {
   if (stripeErr) {
@@ -7,6 +10,17 @@ const postStripeCharge = res => (stripeErr, stripeRes) => {
     res.status(200).send({ success: stripeRes });
   }
 };
+
+const slackHook = process.env.SLACK_HOOK;
+
+const sendMessageToSlack = msg => fetch(slackHook, {
+  method: 'POST',
+  body: JSON.stringify({ text: msg }),
+  headers: { 'Content-Type': 'application/json' },
+})
+  .then(response => response.status)
+  .then(status => ({ err: null, status }))
+  .catch(err => ({ err, status: 400 }));
 
 const paymentApi = (app) => {
   app.get('/', (req, res) => {
@@ -17,9 +31,12 @@ const paymentApi = (app) => {
     stripe.charges.create(req.body, postStripeCharge(res));
   });
 
-  app.post('/webhook', (req, res) => {
-    console.log(req.body);
-    res.status(200).send('okay!');
+  app.post('/webhook', async (req, res) => {
+    const slackReply = await sendMessageToSlack(JSON.stringify(req.body));
+    if (slackReply.status === 200) {
+      return res.status(200).send('message sent to slack');
+    }
+    return res.status(200).send('nothing from slack');
   });
 
   return app;
