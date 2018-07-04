@@ -40,7 +40,7 @@ const paymentApi = (app) => {
     const sig = req.headers['stripe-signature'];
     try {
       const event = stripe.webhooks.constructEvent(req.body, sig, endpoint);
-      const slackReply = await sendMessageToSlack(JSON.stringify(event.data));
+      const slackReply = await sendMessageToSlack(JSON.stringify(event));
       if (slackReply.status === 200) {
         return res.status(200).send('message sent to slack');
       }
