@@ -12,8 +12,8 @@ const corsOptions = {
 
 const configureServer = (app) => {
   app.use(cors(corsOptions));
-  // app.use(bodyParser.raw({ type: '*/*' })); // see https://stripe.com/docs/webhooks
-  app.use(bodyParser.json());
+  app.use(bodyParser.raw({ type: '*/*' })); // see https://stripe.com/docs/webhooks
+  // app.use(bodyParser.json());
 };
 
 module.exports = configureServer;

@@ -21,7 +21,7 @@ const sendMessageToSlack = (msg) => {
     body: jMesg,
     headers: { 'Content-Type': 'application/json' },
   })
-    .then((response) => response.status)
+    .then(response => response.status)
     .then(status => ({ err: null, status }))
     .catch(err => ({ err, status: 400 }));
 };
@@ -35,8 +35,8 @@ const paymentApi = (app) => {
   });
 
   app.post('/webhook', async (req, res) => {
-    // pretty hacky. stringify req body into a mess of text, send that to slack function
-    const slackReply = await sendMessageToSlack(JSON.stringify(req.body));
+    const x = JSON.parse(req.body);
+    const slackReply = await sendMessageToSlack(JSON.stringify(x));
     if (slackReply.status === 200) {
       return res.status(200).send('message sent to slack');
     }
