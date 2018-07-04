@@ -36,6 +36,7 @@ const paymentApi = (app) => {
 
   app.post('/webhook', async (req, res) => {
     const x = JSON.parse(req.body);
+    console.log(x);
     const slackReply = await sendMessageToSlack(JSON.stringify(x));
     if (slackReply.status === 200) {
       return res.status(200).send('message sent to slack');
