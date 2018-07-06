@@ -35,6 +35,27 @@ const paymentApi = (app) => {
     stripe.charges.create(req.body, postStripeCharge(res));
   });
 
+  app.post('/newcustomer', (req, res) => {
+    const cust = JSON.parse(req.body);
+    try {
+      return stripe.customers.create({
+        email: `${cust.email}`,
+        metadata: {
+          firstName: cust.firstName,
+          lastName: cust.lastName,
+          creationInfo: cust.info || null,
+        },
+        description: `create customer object for ${cust.email}`,
+      }, (err, customer) => {
+        if (err) return res.status(400).end();
+        return res.status(200).send(customer);
+      });
+    } catch (err) {
+      console.log(err); // eslint-disable-line
+      return res.status(400).end();
+    }
+  });
+
   app.post('/webhook', async (req, res) => {
     // verify: https://stripe.com/docs/webhooks/signatures
     const sig = req.headers['stripe-signature'];
@@ -46,7 +67,7 @@ const paymentApi = (app) => {
       }
       return res.status(200).send('nothing from slack');
     } catch (err) {
-      console.log(err);
+      console.log(err); // eslint-disable-line
       return res.status(400).end();
     }
   });
