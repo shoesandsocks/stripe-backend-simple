@@ -12,18 +12,6 @@ const postStripeCharge = res => (stripeErr, stripeRes) => {
     res.status(200).send({ success: stripeRes });
   }
 };
-  // see https://github.com/stripe/stripe-node/blob/master/examples/webhook-signing/express.js
-function addRawBody(req, res, next) {
-  req.setEncoding('utf8');
-  let data = '';
-  req.on('data', (chunk) => {
-    data += chunk;
-  });
-  req.on('end', () => {
-    req.rawBody = data;
-    next();
-  });
-}
 
 const sendMessageToSlack = (msg) => {
   // slack messages require a 'text' key. stringify that, with a string message as its value
@@ -68,11 +56,11 @@ const paymentApi = (app) => {
     }
   });
 
-  app.post('/webhook', addRawBody, async (req, res) => {
+  app.post('/webhook', async (req, res) => {
     // verify: https://stripe.com/docs/webhooks/signatures
     const sig = req.headers['stripe-signature'];
     try {
-      const event = stripe.webhooks.constructEvent(req.rawBody, sig, endpoint);
+      const event = stripe.webhooks.constructEvent(req.body, sig, endpoint);
       const slackReply = await sendMessageToSlack(JSON.stringify(event));
       if (slackReply.status === 200) {
         return res.status(200).send('message sent to slack');
