@@ -14,7 +14,7 @@ const postStripeCharge = res => (stripeErr, stripeRes) => {
 };
   // see https://github.com/stripe/stripe-node/blob/master/examples/webhook-signing/express.js
 function addRawBody(req, res, next) {
-  // req.setEncoding('utf8');
+  req.setEncoding('utf8');
   let data = '';
   req.on('data', (chunk) => {
     data += chunk;
