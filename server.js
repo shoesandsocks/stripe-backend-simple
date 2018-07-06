@@ -26,8 +26,8 @@ function addRawBody(req, res, next) {
 const configureServer = (app) => {
   app.use(cors(corsOptions));
   app.use(addRawBody);
-  app.use(bodyParser.raw({ type: '*/*' })); // see https://stripe.com/docs/webhooks
-  // app.use(bodyParser.json());
+  // app.use(bodyParser.raw({ type: '*/*' })); // see https://stripe.com/docs/webhooks
+  app.use(bodyParser.json());
 };
 
 module.exports = configureServer;
