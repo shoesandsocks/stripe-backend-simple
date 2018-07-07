@@ -46,17 +46,21 @@ const paymentApi = (app) => {
           creationInfo: cust.info || null,
         },
         description: `create customer object for ${cust.email}`,
+        source: cust.token,
       }, (err, customer) => {
         if (err) return res.status(400).end();
         return res.status(200).send(customer);
       });
     } catch (err) {
       console.log(err); // eslint-disable-line
-      return res.status(400).end();
+      return res.status(400).send({ err });
     }
   });
 
   app.post('/webhook', async (req, res) => {
+    // TODO:: HEY NOTE TO SELF DUMMY - if you think this isn't working, maybe the env
+    // variable needs to be swapped back to LIVE, because its in permanent TEST right now...
+
     // verify: https://stripe.com/docs/webhooks/signatures
     const sig = req.headers['stripe-signature'];
     try {
