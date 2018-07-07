@@ -39,14 +39,14 @@ const paymentApi = (app) => {
     const cust = JSON.parse(req.body);
     try {
       return stripe.customers.create({
+        description: `create customer object for ${cust.email}`,
+        source: cust.token.id, // N.B. only the ID here, not the whole token.
         email: `${cust.email}`,
         metadata: {
           firstName: cust.firstName,
           lastName: cust.lastName,
           creationInfo: cust.info || null,
         },
-        description: `create customer object for ${cust.email}`,
-        source: cust.token,
       }, (err, customer) => {
         if (err) return res.status(400).end();
         return res.status(200).send(customer);
