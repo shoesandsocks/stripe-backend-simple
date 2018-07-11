@@ -10,15 +10,19 @@ const tabs = (num) => {
 
 const newline = (data, indent = 0) => {
   let block = '';
-  Object.entries(data).forEach((array) => {
-    if (array[1] === null) {
-      block += `${tabs(indent)}${array[0]}: null\n`;
-    } else if (typeof array[1] === 'object') {
-      block += `${tabs(indent)}${array[0]}:\n${newline(array[1], indent + 1)}`;
-    } else {
-      block += `${tabs(indent)}${array[0]}: ${array[1]}\n`;
-    }
-  });
+  try {
+    Object.entries(data).forEach((array) => {
+      if (array[1] === null) {
+        block += `${tabs(indent)}${array[0]}: null\n`;
+      } else if (typeof array[1] === 'object') {
+        block += `${tabs(indent)}${array[0]}:\n${newline(array[1], indent + 1)}`;
+      } else {
+        block += `${tabs(indent)}${array[0]}: ${array[1]}\n`;
+      }
+    });
+  } catch (error) {
+    return 'error';
+  }
   return block;
 };
 
@@ -27,5 +31,6 @@ module.exports = (o) => {
     created, livemode, pending_webhooks, type, data,
   } = o;
   const date = new Date(created * 1000).toLocaleString();
+  console.log('we got this far: ', type, date);
   return `Received Stripe notification (${date}). Type: ${type}. In livemode? ${livemode}. Pending hooks: ${pending_webhooks}. Data: ${newline(data)}`;
 };
