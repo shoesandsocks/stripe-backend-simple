@@ -35,4 +35,4 @@ const convert = (o) => {
   return `Received Stripe notification (${date}). Type: ${type}. In livemode? ${livemode}. Pending hooks: ${pending_webhooks}. Data: ${newline(data)}`;
 };
 
-exports.convert = convert;
+module.exports = convert;
