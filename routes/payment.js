@@ -2,6 +2,7 @@ const fetch = require('node-fetch');
 
 const stripe = require('../constants/stripe');
 const endpoint = require('../constants/endpoint');
+const saveUser = require('../dbase/connect');
 
 require('dotenv').config();
 
@@ -35,25 +36,71 @@ const paymentApi = (app) => {
     stripe.charges.create(req.body, postStripeCharge(res));
   });
 
+  app.post('/createsubscription', (req, res) => {
+    const body = JSON.parse(req.body);
+    stripe.subscriptions.create({
+      customer: body.customer,
+      items: [
+        {
+          plan: body.plan, // plan_DBMUBdi4za2guX
+        },
+      ],
+    }, (err, subscription) => {
+      if (!err) {
+        return res.json(subscription);
+      }
+      return res.status(400).end();
+    });
+  });
+
+  app.get('/getcustomers', (req, res) => {
+    stripe.customers.list({}, async (err, customers) => {
+      if (!err) {
+        // console.log(customers);
+        return res.json({ customers: customers.data });
+      }
+      return res.status(400).end();
+    });
+  });
+
   app.post('/newcustomer', (req, res) => {
     const cust = JSON.parse(req.body);
-    try {
-      return stripe.customers.create({
-        description: `create customer object for ${cust.email}`,
-        source: cust.token.id, // N.B. only the ID here, not the whole token.
-        email: `${cust.email}`,
-        metadata: {
-          firstName: cust.firstName,
-          lastName: cust.lastName,
-          creationInfo: cust.info || null,
-        },
-      }, (err, customer) => {
-        if (err) return res.status(400).end();
-        return res.status(200).send(customer);
-      });
-    } catch (err) {
-      console.log(err); // eslint-disable-line
-      return res.status(400).send({ err });
+    const source = cust.token !== null ? cust.token.id : null;
+    const userObjectToSave = {
+      firstName: cust.firstName,
+      lastName: cust.lastName,
+      email: cust.email,
+      stripe_id: null,
+    };
+    if (source) {
+      try {
+        return stripe.customers.create({
+          description: `create customer object for ${cust.email}`,
+          source, // N.B. only the ID here, not the whole token.
+          email: `${cust.email}`,
+          metadata: {
+            firstName: cust.firstName,
+            lastName: cust.lastName,
+          },
+        }, (err, customer) => {
+          // console.log({ err, customer });
+          if (err) return res.status(400).json({ err });
+          userObjectToSave.stripe_id = customer.id;
+          saveUser(userObjectToSave);
+          return res.status(200).json({ customer });
+        });
+      } catch (err) {
+        console.log(err); // eslint-disable-line
+        return res.status(400).json({ err });
+      }
+    } else {
+      try {
+        saveUser(userObjectToSave);
+        return res.status(200).json({ userObjectToSave });
+      } catch (mlabError) {
+        console.log(err); // eslint-disable-line
+        return res.status(400).json({ err: mlabError });
+      }
     }
   });
 
