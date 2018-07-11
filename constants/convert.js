@@ -26,7 +26,7 @@ const newline = (data, indent = 0) => {
   return block;
 };
 
-module.exports = (o) => {
+const convert = (o) => {
   const {
     created, livemode, pending_webhooks, type, data,
   } = o;
@@ -34,3 +34,5 @@ module.exports = (o) => {
   console.log('we got this far: ', type, date);
   return `Received Stripe notification (${date}). Type: ${type}. In livemode? ${livemode}. Pending hooks: ${pending_webhooks}. Data: ${newline(data)}`;
 };
+
+exports.convert = convert;
