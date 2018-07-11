@@ -4,6 +4,8 @@ const stripe = require('../constants/stripe');
 const endpoint = require('../constants/endpoint');
 const saveUser = require('../dbase/connect');
 
+const convert = require('../constants/convert');
+
 require('dotenv').config();
 
 const postStripeCharge = res => (stripeErr, stripeRes) => {
@@ -16,7 +18,8 @@ const postStripeCharge = res => (stripeErr, stripeRes) => {
 
 const sendMessageToSlack = (msg) => {
   // slack messages require a 'text' key. stringify that, with a string message as its value
-  const body = JSON.stringify({ text: msg });
+  // and also, the convert function kinda pretty-prints the msg object, hopefully
+  const body = JSON.stringify({ text: convert(msg) });
   return fetch(process.env.SLACK_HOOK, {
     method: 'POST',
     body,

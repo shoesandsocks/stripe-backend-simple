@@ -1,7 +1,7 @@
 const FRONTEND_DEV_URLS = [
   'http://localhost:3000',
   'http://localhost:8000',
-  'https://f9000564.ngrok.io',
+  'https://938610c2.ngrok.io',
 ]; // TODO: for blog
 
 const FRONTEND_PROD_URLS = [
