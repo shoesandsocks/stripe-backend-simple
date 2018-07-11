@@ -27,13 +27,11 @@ const newline = (data, indent = 0) => {
 };
 
 const convert = (o) => {
-  console.log(o);
   const p = JSON.parse(o);
   const {
     created, livemode, pending_webhooks, type, data,
   } = p;
   const date = new Date(created * 1000).toLocaleString();
-  console.log('we got this far: ', type, date);
   return `Received Stripe notification (${date}). Type: ${type}. In livemode? ${livemode}. Pending hooks: ${pending_webhooks}. Data: ${newline(data)}`;
 };
 
