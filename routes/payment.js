@@ -1,17 +1,15 @@
 require('dotenv').config();
 
 const fetch = require('node-fetch');
-
 const stripe = require('../constants/stripe');
 
-const live_endpoint = process.env.STRIPE_LIVE_ENDPOINT_SECRET;
-const test_endpoint = process.env.STRIPE_TEST_ENDPOINT_SECRET;
+const liveEndpoint = process.env.STRIPE_LIVE_ENDPOINT_SECRET;
+const testEndpoint = process.env.STRIPE_TEST_ENDPOINT_SECRET;
+
+console.log(liveEndpoint, testEndpoint);
 
 const saveUser = require('../dbase/connect');
-
 const convert = require('../constants/convert');
-
-require('dotenv').config();
 
 const postStripeCharge = res => (stripeErr, stripeRes) => {
   if (stripeErr) {
@@ -116,7 +114,7 @@ const paymentApi = (app) => {
     // verify: https://stripe.com/docs/webhooks/signatures
     const sig = req.headers['stripe-signature'];
     try {
-      const event = stripe.webhooks.constructEvent(req.body, sig, live_endpoint);
+      const event = stripe.webhooks.constructEvent(req.body, sig, liveEndpoint);
       const slackReply = await sendMessageToSlack(JSON.stringify(event));
       if (slackReply.status === 200) {
         return res.status(200).send('message sent to slack');
@@ -132,7 +130,7 @@ const paymentApi = (app) => {
     // verify: https://stripe.com/docs/webhooks/signatures
     const sig = req.headers['stripe-signature'];
     try {
-      const event = stripe.webhooks.constructEvent(req.body, sig, test_endpoint);
+      const event = stripe.webhooks.constructEvent(req.body, sig, testEndpoint);
       const slackReply = await sendMessageToSlack(JSON.stringify(event));
       if (slackReply.status === 200) {
         return res.status(200).send('message sent to slack');
