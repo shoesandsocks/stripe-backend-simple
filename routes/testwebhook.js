@@ -6,7 +6,7 @@ const convert = require('../constants/convert');
 
 const stripe = configureStripe(process.env.STRIPE_TEST_SECRET);
 const testEndpoint = process.env.STRIPE_TEST_ENDPOINT_SECRET;
-
+console.log(stripe);
 const sendMessageToSlack = (msg) => {
   const body = JSON.stringify({ text: convert(msg) });
   return fetch(process.env.SLACK_HOOK, {
@@ -19,10 +19,10 @@ const sendMessageToSlack = (msg) => {
     .catch(err => ({ err, status: 242 }));
 };
 
-const paymentApi = (app) => {
+const testWebhookApi = (app) => {
   // TESTSTRIPE and TESTENDPOINT, instead, for test webhooks
   app.post('/testwebhook', async (req, res) => {
-    console.log({ req });
+    console.log(req.body);
     const sig = req.headers['stripe-signature'];
     try {
       const event = stripe.webhooks.constructEvent(req.body, sig, testEndpoint);
@@ -40,4 +40,4 @@ const paymentApi = (app) => {
   return app;
 };
 
-module.exports = paymentApi;
+module.exports = testWebhookApi;
