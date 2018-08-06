@@ -113,15 +113,13 @@ const paymentApi = (app) => {
 
     // verify: https://stripe.com/docs/webhooks/signatures
     const sig = req.headers['stripe-signature'];
-    console.log({ sig });
     try {
       /*
         testing locally with Postman, use this instead of event constructor
         const body = JSON.parse(req.body);
         const slackReply = await sendMessageToSlack(body);
       */
-      const event = stripe.webhooks.constructEvent(req.payload, sig, endpoint); // not req.body?!
-      console.log({ event });
+      const event = stripe.webhooks.constructEvent(req.body, sig, endpoint);
       const slackReply = await sendMessageToSlack(JSON.stringify(event));
       if (slackReply.status === 200) {
         return res.status(200).send('message sent to slack');
