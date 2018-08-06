@@ -1,7 +1,12 @@
+require('dotenv').config();
+
 const fetch = require('node-fetch');
 
 const stripe = require('../constants/stripe');
-const endpoint = require('../constants/endpoint');
+
+const live_endpoint = process.env.STRIPE_LIVE_ENDPOINT_SECRET;
+const test_endpoint = process.env.STRIPE_TEST_ENDPOINT_SECRET;
+
 const saveUser = require('../dbase/connect');
 
 const convert = require('../constants/convert');
@@ -108,18 +113,26 @@ const paymentApi = (app) => {
   });
 
   app.post('/webhook', async (req, res) => {
-    // TODO:: HEY NOTE TO SELF DUMMY - if you think this isn't working, maybe the env
-    // variable needs to be swapped back to LIVE, because its in permanent TEST right now...
-
     // verify: https://stripe.com/docs/webhooks/signatures
     const sig = req.headers['stripe-signature'];
     try {
-      /*
-        testing locally with Postman, use this instead of event constructor
-        const body = JSON.parse(req.body);
-        const slackReply = await sendMessageToSlack(body);
-      */
-      const event = stripe.webhooks.constructEvent(req.body, sig, endpoint);
+      const event = stripe.webhooks.constructEvent(req.body, sig, live_endpoint);
+      const slackReply = await sendMessageToSlack(JSON.stringify(event));
+      if (slackReply.status === 200) {
+        return res.status(200).send('message sent to slack');
+      }
+      return res.status(200).send('nothing from slack');
+    } catch (err) {
+      console.log(err); // eslint-disable-line
+      return res.status(400).end();
+    }
+  });
+
+  app.post('/testwebhook', async (req, res) => {
+    // verify: https://stripe.com/docs/webhooks/signatures
+    const sig = req.headers['stripe-signature'];
+    try {
+      const event = stripe.webhooks.constructEvent(req.body, sig, test_endpoint);
       const slackReply = await sendMessageToSlack(JSON.stringify(event));
       if (slackReply.status === 200) {
         return res.status(200).send('message sent to slack');
