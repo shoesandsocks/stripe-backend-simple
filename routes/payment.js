@@ -6,6 +6,8 @@ const configureStripe = require('stripe');
 const stripe = configureStripe(process.env.STRIPE_LIVE_SECRET);
 const teststripe = configureStripe(process.env.STRIPE_TEST_SECRET);
 
+console.log(stripe, teststripe);
+
 const liveEndpoint = process.env.STRIPE_LIVE_ENDPOINT_SECRET;
 const testEndpoint = process.env.STRIPE_TEST_ENDPOINT_SECRET;
 
