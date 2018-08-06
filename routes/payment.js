@@ -3,10 +3,7 @@ require('dotenv').config();
 const fetch = require('node-fetch');
 const configureStripe = require('stripe');
 
-const stripe = configureStripe(process.env.STRIPE_LIVE_SECRET);
-const teststripe = configureStripe(process.env.STRIPE_TEST_SECRET);
-
-console.log(stripe, teststripe);
+let stripe = configureStripe(process.env.STRIPE_LIVE_SECRET);
 
 const liveEndpoint = process.env.STRIPE_LIVE_ENDPOINT_SECRET;
 const testEndpoint = process.env.STRIPE_TEST_ENDPOINT_SECRET;
@@ -133,16 +130,18 @@ const paymentApi = (app) => {
   app.post('/testwebhook', async (req, res) => {
     const sig = req.headers['stripe-signature'];
     try {
-      const event = teststripe.webhooks.constructEvent(req.body, sig, testEndpoint);
+      stripe = configureStripe(process.env.STRIPE_TEST_SECRET);
+      const event = stripe.webhooks.constructEvent(req.body, sig, testEndpoint);
       const slackReply = await sendMessageToSlack(JSON.stringify(event));
       if (slackReply.status === 200) {
-        return res.status(200).send('message sent to slack');
+        res.status(200).send('message sent to slack');
       }
-      return res.status(200).send('nothing from slack');
+      res.status(200).send('nothing from slack');
     } catch (err) {
       console.log(err); // eslint-disable-line
-      return res.status(400).end();
+      res.status(400).end();
     }
+    stripe = configureStripe(process.env.STRIPE_LIVE_SECRET);
   });
 
   return app;
