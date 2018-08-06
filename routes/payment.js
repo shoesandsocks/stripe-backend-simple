@@ -27,7 +27,7 @@ const sendMessageToSlack = (msg) => {
   })
     .then(response => response.status)
     .then(status => ({ err: null, status }))
-    .catch(err => ({ err, status: 400 }));
+    .catch(err => ({ err, status: 242 }));
 };
 
 const paymentApi = (app) => {
@@ -112,14 +112,16 @@ const paymentApi = (app) => {
     // variable needs to be swapped back to LIVE, because its in permanent TEST right now...
 
     // verify: https://stripe.com/docs/webhooks/signatures
-    const headers = JSON.parse(req.headers);  // error from not parsing this first?
+    const sig = req.headers['stripe-signature'];
+    console.log({ sig });
     try {
       /*
         testing locally with Postman, use this instead of event constructor
         const body = JSON.parse(req.body);
         const slackReply = await sendMessageToSlack(body);
       */
-      const event = stripe.webhooks.constructEvent(req.body, headers['stripe-signature'], endpoint); // https://github.com/stripe/stripe-node/issues/356#issuecomment-311658193
+      const event = stripe.webhooks.constructEvent(req.body, sig, endpoint);
+      console.log({ event });
       const slackReply = await sendMessageToSlack(JSON.stringify(event));
       if (slackReply.status === 200) {
         return res.status(200).send('message sent to slack');
