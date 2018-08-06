@@ -22,6 +22,7 @@ const sendMessageToSlack = (msg) => {
 const paymentApi = (app) => {
   // TESTSTRIPE and TESTENDPOINT, instead, for test webhooks
   app.post('/testwebhook', async (req, res) => {
+    console.log({ req });
     const sig = req.headers['stripe-signature'];
     try {
       const event = stripe.webhooks.constructEvent(req.body, sig, testEndpoint);
