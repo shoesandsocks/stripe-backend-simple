@@ -4,7 +4,6 @@ const fetch = require('node-fetch');
 const configureStripe = require('stripe');
 
 const stripe = configureStripe(process.env.STRIPE_LIVE_SECRET);
-
 const liveEndpoint = process.env.STRIPE_LIVE_ENDPOINT_SECRET;
 
 const saveUser = require('../dbase/connect');

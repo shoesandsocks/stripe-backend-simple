@@ -27,12 +27,12 @@ const testWebhookApi = (app) => {
       const event = stripe.webhooks.constructEvent(req.body, sig, testEndpoint);
       const slackReply = await sendMessageToSlack(JSON.stringify(event));
       if (slackReply.status === 200) {
-        res.status(200).send('message sent to slack');
+        res.status(200).send({ error: null, message: 'message sent to slack' });
       }
-      res.status(200).send('nothing from slack');
+      res.status(200).send({ error: null, message: 'POST to /testwebhook succeeded but no Slack response' });
     } catch (err) {
       console.log(err); // eslint-disable-line
-      res.status(400).end();
+      res.status(400).send({ error: 'POST to /testwebhook failed', message: null });
     }
   });
 

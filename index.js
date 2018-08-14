@@ -1,12 +1,12 @@
 const express = require('express');
 
-// const configureServer = require('./server');
+const configureServer = require('./server');
 const configureRoutes = require('./routes');
 
 const app = express();
 const port = process.env.PORT || 8080;
 
-// configureServer(app);
+configureServer(app);
 configureRoutes(app);
 
 app.listen(port, (error) => {
