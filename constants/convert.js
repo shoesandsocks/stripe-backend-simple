@@ -32,7 +32,9 @@ const convert = (o) => {
     created, livemode, pending_webhooks, type, data,
   } = p;
   const date = new Date(created * 1000).toLocaleString();
-  return `Received Stripe notification (${date}). Type: ${type}. In livemode? ${livemode}. Pending hooks: ${pending_webhooks}. Data: ${newline(data)}`;
+  return livemode
+    ? `Received Stripe notification (${date}). Type: ${type}. In livemode? ${livemode}. Pending hooks: ${pending_webhooks}. Data: ${newline(data)}`
+    : `Received Stripe notification (${date}). Type: ${type}. In livemode? ${livemode}.`;
 };
 
 module.exports = convert;
