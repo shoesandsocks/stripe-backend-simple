@@ -3,19 +3,21 @@ require('dotenv').config();
 const fetch = require('node-fetch');
 const configureStripe = require('stripe');
 
-const stripe = configureStripe(process.env.STRIPE_LIVE_SECRET);
-const liveEndpoint = process.env.STRIPE_LIVE_ENDPOINT_SECRET;
+const STRIPE_SECRET_KEY =
+  process.env.NODE_ENV === 'production'
+    ? process.env.STRIPE_LIVE_SECRET
+    : process.env.STRIPE_TEST_SECRET;
+
+const STRIPE_SECRET_ENDPOINT =
+  process.env.NODE_ENV === 'production'
+    ? process.env.STRIPE_LIVE_ENDPOINT_SECRET
+    : process.env.STRIPE_TEST_ENDPOINT_SECRET;
+
+const stripe = configureStripe(STRIPE_SECRET_KEY);
+const liveEndpoint = STRIPE_SECRET_ENDPOINT;
 
 const saveUser = require('../dbase/connect');
 const convert = require('../constants/convert');
-
-const postStripeCharge = res => (stripeErr, stripeRes) => {
-  if (stripeErr) {
-    res.status(500).send({ error: stripeErr });
-  } else {
-    res.status(200).send({ success: stripeRes });
-  }
-};
 
 const sendMessageToSlack = (msg) => {
   // slack messages require a 'text' key. stringify that, with a string message as its value
@@ -37,7 +39,15 @@ const paymentApi = (app) => {
   });
 
   app.post('/', (req, res) => {
-    stripe.charges.create(req.body, postStripeCharge(res));
+    const obj = JSON.parse(req.body);
+    stripe.charges.create({ ...obj })
+      .then((outcome) => {
+        console.log(`outcome s: ${JSON.stringify(outcome)}`);
+        res.status(200).send({ success: outcome.status });
+      })
+      .catch((outcome) => {
+        res.status(500).send({ error: outcome.status });
+      });
   });
 
   app.post('/createsubscription', (req, res) => {

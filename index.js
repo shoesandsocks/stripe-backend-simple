@@ -11,5 +11,5 @@ configureRoutes(app);
 
 app.listen(port, (error) => {
   if (error) throw error;
-  console.log(`Server running on port: ${port}`);
+  console.log(`Server running on port: ${port} in ${process.env.NODE_ENV}`);
 });
