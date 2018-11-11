@@ -39,14 +39,16 @@ const paymentApi = (app) => {
   });
 
   app.post('/', (req, res) => {
+    console.log('handling POST');
     const obj = JSON.parse(req.body);
-    stripe.charges.create({ ...obj })
-      .then((outcome) => {
-        console.log(`outcome s: ${JSON.stringify(outcome)}`);
-        res.status(200).send({ success: outcome.status });
+    return stripe.charges.create({ ...obj })
+      .then(() => {
+        console.log('good');
+        res.status(200).json({ response: 'done!' });
       })
-      .catch((outcome) => {
-        res.status(500).send({ error: outcome.status });
+      .catch(() => {
+        console.log('bad');
+        res.status(500).json({ response: 'payment failed' });
       });
   });
 
