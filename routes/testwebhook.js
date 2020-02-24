@@ -14,9 +14,9 @@ const sendMessageToSlack = (msg) => {
     body,
     headers: { 'Content-Type': 'application/json' },
   })
-    .then(response => response.status)
-    .then(status => ({ err: null, status }))
-    .catch(err => ({ err, status: 242 }));
+    .then((response) => response.status)
+    .then((status) => ({ err: null, status }))
+    .catch((err) => ({ err, status: 242 }));
 };
 
 const testWebhookApi = (app) => {

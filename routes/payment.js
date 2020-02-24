@@ -3,15 +3,13 @@ require('dotenv').config();
 const fetch = require('node-fetch');
 const configureStripe = require('stripe');
 
-const STRIPE_SECRET_KEY =
-  process.env.NODE_ENV === 'production'
-    ? process.env.STRIPE_LIVE_SECRET
-    : process.env.STRIPE_TEST_SECRET;
+const STRIPE_SECRET_KEY = process.env.NODE_ENV === 'production'
+  ? process.env.STRIPE_LIVE_SECRET
+  : process.env.STRIPE_TEST_SECRET;
 
-const STRIPE_SECRET_ENDPOINT =
-  process.env.NODE_ENV === 'production'
-    ? process.env.STRIPE_LIVE_ENDPOINT_SECRET
-    : process.env.STRIPE_TEST_ENDPOINT_SECRET;
+const STRIPE_SECRET_ENDPOINT = process.env.NODE_ENV === 'production'
+  ? process.env.STRIPE_LIVE_ENDPOINT_SECRET
+  : process.env.STRIPE_TEST_ENDPOINT_SECRET;
 
 const stripe = configureStripe(STRIPE_SECRET_KEY);
 const liveEndpoint = STRIPE_SECRET_ENDPOINT;
@@ -28,9 +26,9 @@ const sendMessageToSlack = (msg) => {
     body,
     headers: { 'Content-Type': 'application/json' },
   })
-    .then(response => response.status)
-    .then(status => ({ err: null, status }))
-    .catch(err => ({ err, status: 242 }));
+    .then((response) => response.status)
+    .then((status) => ({ err: null, status }))
+    .catch((err) => ({ err, status: 242 }));
 };
 
 const paymentApi = (app) => {
