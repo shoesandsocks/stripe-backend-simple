@@ -1,30 +1,32 @@
-require('dotenv').config();
+require("dotenv").config();
 
-const fetch = require('node-fetch');
-const configureStripe = require('stripe');
+const fetch = require("node-fetch");
+const configureStripe = require("stripe");
 
-const STRIPE_SECRET_KEY = process.env.NODE_ENV === 'production'
-  ? process.env.STRIPE_LIVE_SECRET
-  : process.env.STRIPE_TEST_SECRET;
+const STRIPE_SECRET_KEY =
+  process.env.NODE_ENV === "production"
+    ? process.env.STRIPE_LIVE_SECRET
+    : process.env.STRIPE_TEST_SECRET;
 
-const STRIPE_SECRET_ENDPOINT = process.env.NODE_ENV === 'production'
-  ? process.env.STRIPE_LIVE_ENDPOINT_SECRET
-  : process.env.STRIPE_TEST_ENDPOINT_SECRET;
+const STRIPE_SECRET_ENDPOINT =
+  process.env.NODE_ENV === "production"
+    ? process.env.STRIPE_LIVE_ENDPOINT_SECRET
+    : process.env.STRIPE_TEST_ENDPOINT_SECRET;
 
 const stripe = configureStripe(STRIPE_SECRET_KEY);
 const liveEndpoint = STRIPE_SECRET_ENDPOINT;
 
-const saveUser = require('../dbase/connect');
-const convert = require('../constants/convert');
+const saveUser = require("../dbase/connect");
+const convert = require("../constants/convert");
 
 const sendMessageToSlack = (msg) => {
   // slack messages require a 'text' key. stringify that, with a string message as its value
   // and also, the convert function kinda pretty-prints the msg object, hopefully
   const body = JSON.stringify({ text: convert(msg) });
   return fetch(process.env.SLACK_HOOK, {
-    method: 'POST',
+    method: "POST",
     body,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { "Content-Type": "application/json" },
   })
     .then((response) => response.status)
     .then((status) => ({ err: null, status }))
@@ -32,42 +34,65 @@ const sendMessageToSlack = (msg) => {
 };
 
 const paymentApi = (app) => {
-  app.get('/', (req, res) => {
-    res.send({ message: 'Hello Stripe checkout server!', timestamp: new Date().toISOString() });
-  });
-
-  app.post('/', (req, res) => {
-    console.log('handling POST');
-    const obj = JSON.parse(req.body);
-    return stripe.charges.create({ ...obj })
-      .then(() => {
-        console.log('good');
-        res.status(200).json({ response: 'done!' });
-      })
-      .catch(() => {
-        console.log('bad');
-        res.status(500).json({ response: 'payment failed' });
-      });
-  });
-
-  app.post('/createsubscription', (req, res) => {
-    const body = JSON.parse(req.body);
-    stripe.subscriptions.create({
-      customer: body.customer,
-      items: [
-        {
-          plan: body.plan, // plan_DBMUBdi4za2guX
-        },
-      ],
-    }, (err, subscription) => {
-      if (!err) {
-        return res.json(subscription);
-      }
-      return res.status(400).end();
+  app.get("/", (req, res) => {
+    res.send({
+      message: "Hello Stripe checkout server!",
+      timestamp: new Date().toISOString(),
     });
   });
 
-  app.get('/getcustomers', (req, res) => {
+  app.post("/", async (req, res) => {
+    console.log("handling POST");
+    console.log(req.body);
+    // const obj = JSON.parse(req.body); // FIXME: this is a bad idea. hackable from F.E.
+    // Token is created using Stripe Checkout or Elements!
+    // Get the payment token ID submitted by the form:
+    const token = req.body.stripeToken; // Using Express
+
+    const charge = await stripe.charges.create({
+      amount: 999,
+      currency: "usd",
+      description: "Example charge",
+      source: token,
+    });
+    console.log(Object.keys(charge));
+    if (charge.object !== "charge") {
+      res.json({ error: charge.error });
+    } else {
+      res.json({ message: "success" });
+    }
+    // return stripe.charges.create({ ...obj })
+    //   .then(() => {
+    //     console.log('good');
+    //     res.status(200).json({ response: 'done!' });
+    //   })
+    //   .catch(() => {
+    //     console.log('bad');
+    //     res.status(500).json({ response: 'payment failed' });
+    //   });
+  });
+
+  app.post("/createsubscription", (req, res) => {
+    const body = JSON.parse(req.body);
+    stripe.subscriptions.create(
+      {
+        customer: body.customer,
+        items: [
+          {
+            plan: body.plan, // plan_DBMUBdi4za2guX
+          },
+        ],
+      },
+      (err, subscription) => {
+        if (!err) {
+          return res.json(subscription);
+        }
+        return res.status(400).end();
+      }
+    );
+  });
+
+  app.get("/getcustomers", (req, res) => {
     stripe.customers.list({}, async (err, customers) => {
       if (!err) {
         // console.log(customers);
@@ -77,7 +102,7 @@ const paymentApi = (app) => {
     });
   });
 
-  app.post('/newcustomer', (req, res) => {
+  app.post("/newcustomer", (req, res) => {
     const cust = JSON.parse(req.body);
     const source = cust.token !== null ? cust.token.id : null;
     const userObjectToSave = {
@@ -88,21 +113,24 @@ const paymentApi = (app) => {
     };
     if (source) {
       try {
-        return stripe.customers.create({
-          description: `create customer object for ${cust.email}`,
-          source, // N.B. only the ID here, not the whole token.
-          email: `${cust.email}`,
-          metadata: {
-            firstName: cust.firstName,
-            lastName: cust.lastName,
+        return stripe.customers.create(
+          {
+            description: `create customer object for ${cust.email}`,
+            source, // N.B. only the ID here, not the whole token.
+            email: `${cust.email}`,
+            metadata: {
+              firstName: cust.firstName,
+              lastName: cust.lastName,
+            },
           },
-        }, (err, customer) => {
-          // console.log({ err, customer });
-          if (err) return res.status(400).json({ err });
-          userObjectToSave.stripe_id = customer.id;
-          saveUser(userObjectToSave);
-          return res.status(200).json({ customer });
-        });
+          (err, customer) => {
+            // console.log({ err, customer });
+            if (err) return res.status(400).json({ err });
+            userObjectToSave.stripe_id = customer.id;
+            saveUser(userObjectToSave);
+            return res.status(200).json({ customer });
+          }
+        );
       } catch (err) {
         console.log(err); // eslint-disable-line
         return res.status(400).json({ err });
@@ -118,16 +146,16 @@ const paymentApi = (app) => {
     }
   });
 
-  app.post('/webhook', async (req, res) => {
+  app.post("/webhook", async (req, res) => {
     // verify: https://stripe.com/docs/webhooks/signatures
-    const sig = req.headers['stripe-signature'];
+    const sig = req.headers["stripe-signature"];
     try {
       const event = stripe.webhooks.constructEvent(req.body, sig, liveEndpoint);
       const slackReply = await sendMessageToSlack(JSON.stringify(event));
       if (slackReply.status === 200) {
-        return res.status(200).send('message sent to slack');
+        return res.status(200).send("message sent to slack");
       }
-      return res.status(200).send('nothing from slack');
+      return res.status(200).send("nothing from slack");
     } catch (err) {
       console.log(err); // eslint-disable-line
       return res.status(400).end();
