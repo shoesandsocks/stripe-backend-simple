@@ -43,7 +43,6 @@ const paymentApi = (app) => {
 
   app.post("/", async (req, res) => {
     console.log("handling POST");
-    console.log(req.body);
     // const obj = JSON.parse(req.body); // FIXME: this is a bad idea. hackable from F.E.
     // Token is created using Stripe Checkout or Elements!
     // Get the payment token ID submitted by the form:
@@ -55,7 +54,6 @@ const paymentApi = (app) => {
       description: "Example charge",
       source: token,
     });
-    console.log(Object.keys(charge));
     if (charge.object !== "charge") {
       res.json({ error: charge.error });
     } else {
@@ -70,6 +68,20 @@ const paymentApi = (app) => {
     //     console.log('bad');
     //     res.status(500).json({ response: 'payment failed' });
     //   });
+  });
+
+  app.post("/newsletter", async (req, res) => {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: 1099,
+      currency: "usd",
+      // Verify your integration in this guide by including this parameter
+      metadata: { integration_check: "accept_a_payment" },
+    });
+    if (!paymentIntent) {
+      res.json({ error: "nah" });
+    } else {
+      res.json({ message: "success" });
+    }
   });
 
   app.post("/createsubscription", (req, res) => {
