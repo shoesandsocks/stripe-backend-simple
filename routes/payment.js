@@ -16,6 +16,11 @@ const STRIPE_SECRET_ENDPOINT =
 const stripe = configureStripe(STRIPE_SECRET_KEY);
 const liveEndpoint = STRIPE_SECRET_ENDPOINT;
 
+const publishableKey =
+  process.env.NODE_ENV === "production"
+    ? "pk_live_LOHrtxPBcZ5LnlG9KeCV6e9H"
+    : "pk_test_QBxssu5Kyu68z5R3grsjBgO0";
+
 const saveUser = require("../dbase/connect");
 const convert = require("../constants/convert");
 
@@ -70,18 +75,19 @@ const paymentApi = (app) => {
     //   });
   });
 
-  app.post("/newsletter", async (req, res) => {
+  app.post("/create-payment-intent", async (req, res) => {
+    // const { items, currency } = req.body;
+    // Create a PaymentIntent with the order amount and currency
     const paymentIntent = await stripe.paymentIntents.create({
       amount: 1099,
-      currency: "usd",
-      // Verify your integration in this guide by including this parameter
-      metadata: { integration_check: "accept_a_payment" },
+      currency: "USD",
     });
-    if (!paymentIntent) {
-      res.json({ error: "nah" });
-    } else {
-      res.json({ message: "success" });
-    }
+
+    // Send publishable key and PaymentIntent details to client
+    res.send({
+      publishableKey,
+      clientSecret: paymentIntent.client_secret,
+    });
   });
 
   app.post("/createsubscription", (req, res) => {
