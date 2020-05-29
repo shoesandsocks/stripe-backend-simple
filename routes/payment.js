@@ -75,8 +75,8 @@ const paymentApi = (app) => {
       amount: 1099,
       currency: "USD",
     });
-    sendMessageToSlack(`created a paymentIntent on server`);
-    res.json({ client_secret: paymentIntent.client_secret });
+    // sendMessageToSlack(`created a paymentIntent on server`);
+    return res.json({ client_secret: paymentIntent.client_secret });
   });
 
   // app.post("/createsubscription", (req, res) => {
