@@ -4,7 +4,7 @@ const FRONTEND_PROD_URLS = [
   "https://www.pineandvine.com",
   "https://pineandvine.com",
   "https://www.rich-text.net",
-  "https://b76bf8f9.ngrok.io",
+  "https://dev.rich-text.net",
 ];
 
 module.exports =
