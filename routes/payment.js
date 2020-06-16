@@ -1,5 +1,6 @@
 require("dotenv").config();
-
+// Use body-parser to retrieve the raw body as a buffer
+const bodyParser = require("body-parser");
 const fetch = require("node-fetch");
 const configureStripe = require("stripe");
 
@@ -46,17 +47,30 @@ const paymentApi = (app) => {
     });
   });
 
-  app.get("/intent", async (req, res) => {
-    // const { items, currency } = req.body;
+  app.post(
+    "/intent",
+    bodyParser.raw({ type: "application/json" }),
+    async (req, res) => {
+      const { amount } = JSON.parse(req.body);
+      console.log(amount);
 
-    // in practice, get string from client, convert
-    // to an amount here, and send client_secret back
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: 1099,
-      currency: "USD",
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount,
+        currency: "USD",
+      });
+      // sendMessageToSlack(`created a paymentIntent on server`);
+      return res.json({ client_secret: paymentIntent.client_secret });
+    }
+  );
+
+  app.post("/create-customer", async (req, res) => {
+    // Create a new customer object
+    const customer = await stripe.customers.create({
+      email: req.body.email,
     });
-    // sendMessageToSlack(`created a paymentIntent on server`);
-    return res.json({ client_secret: paymentIntent.client_secret });
+
+    // Recommendation: save the customer.id in your database. TODO:
+    res.send({ customer });
   });
 
   app.post("/webhook", async (req, res) => {

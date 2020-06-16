@@ -1,4 +1,4 @@
-const FRONTEND_DEV_URLS = ["http://localhost:8080"]; // TODO: for blog
+const FRONTEND_DEV_URLS = ["http://localhost:8080", "http://localhost:3000"]; // TODO: for blog
 
 const FRONTEND_PROD_URLS = [
   "https://www.pineandvine.com",
