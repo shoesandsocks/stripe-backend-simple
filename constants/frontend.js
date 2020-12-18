@@ -5,6 +5,7 @@ const FRONTEND_PROD_URLS = [
   "https://pineandvine.com",
   "https://www.rich-text.net",
   "https://dev.rich-text.net",
+  "https://dev1.rich-text.net",
 ];
 
 console.log(process.env.NODE_ENV);
