@@ -6,6 +6,7 @@ const FRONTEND_PROD_URLS = [
   "https://www.rich-text.net",
   "https://dev.rich-text.net",
   "https://dev1.rich-text.net",
+  "https://admin.colorshare.club",
 ];
 
 console.log(process.env.NODE_ENV);
